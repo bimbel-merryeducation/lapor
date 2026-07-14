@@ -6,8 +6,10 @@
   <title>Dashboard Kehadiran & Akademik | Belajar Inovasi</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   
   <style>
     /* Styling Relax & Glassmorphism */
@@ -29,11 +31,21 @@
       margin-bottom: 2rem; padding: 1.5rem; 
     }
     
+    /* Perbaikan Header agar tidak tumpang tindih */
+    .header-bar { 
+      display: flex; justify-content: space-between; align-items: center; 
+      flex-wrap: wrap; margin-bottom: 1.5rem; gap: 15px;
+    }
+    .header-text {
+      display: flex; flex-direction: column;
+    }
+    .header-text .title { margin-bottom: 0.2rem !important; }
+    .header-text .subtitle { margin-top: 0 !important; }
+
     .tabs.is-toggle a { border-radius: 8px 8px 0 0; color: #555; background: rgba(255,255,255,0.6); transition: 0.3s ease; border: none; font-weight: 500; margin-right: 2px;}
     .tabs.is-toggle li.is-active a { color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
     .tabs.is-toggle li:hover a { background: rgba(255,255,255,0.9); }
     
-    /* Tab Colors Customization */
     .tabs.is-toggle li:nth-child(1) a { background-color: rgba(62, 142, 208, 0.7); } .tabs.is-toggle li:nth-child(1).is-active a { background-color: #3e8ed0; }
     .tabs.is-toggle li:nth-child(2) a { background-color: rgba(72, 199, 142, 0.7); } .tabs.is-toggle li:nth-child(2).is-active a { background-color: #48c78e; }
     .tabs.is-toggle li:nth-child(3) a { background-color: rgba(255, 221, 87, 0.7); color: #333;} .tabs.is-toggle li:nth-child(3).is-active a { background-color: #ffdd57; color: #333;}
@@ -56,19 +68,25 @@
     .button { border-radius: 8px; transition: 0.2s; }
     .button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
     
-    .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); vertical-align: middle; margin-right: 10px;}
-    .header-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem;}
+    .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-right: 15px;}
     
-    /* Specific Highlights */
-    .highlight-jadwal-ulangan-besok { background-color: rgba(72,199,142,0.2) !important; border-left: 4px solid #48c78e; }
-    .highlight-jadwal-ulangan-senin { background-color: rgba(255,221,87,0.3) !important; border-left: 4px solid #ffdd57; }
-    .highlight-tidak-hadir { background-color: rgba(241,70,104,0.15) !important; border-left: 4px solid #f14668; }
-    .highlight-ulangan-merah { color: #f14668; font-weight: bold; }
+    /* Efek Denyut untuk Ulangan Besok/Lusa */
+    @keyframes pulse-urgent {
+      0% { box-shadow: 0 0 0 0 rgba(241, 70, 104, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(241, 70, 104, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(241, 70, 104, 0); }
+    }
+    .pulse-warning {
+      animation: pulse-urgent 2s infinite;
+      background-color: #ffe5e5 !important;
+      border-left: 5px solid #f14668;
+    }
 
-    /* Responsive adjustments */
     @media screen and (max-width: 768px) {
       .header-bar { flex-direction: column; text-align: center; }
-      .header-bar > div { margin-top: 10px; }
+      .header-text { margin-bottom: 15px; }
+      .is-flex.is-align-items-center { flex-direction: column; }
+      .profile-pic { margin-right: 0; margin-bottom: 10px; }
       .table-container { overflow-x: auto; }
       .tabs li { font-size: 0.85rem; }
     }
@@ -106,17 +124,19 @@
   <div id="app" class="container is-fluid" style="display:none;">
     
     <div class="header-bar section" style="padding: 1rem 1.5rem;">
-      <div>
-        <h1 class="title is-4" style="color: #2c3e50; margin-bottom: 0;">Belajar Inovasi</h1>
+      <div class="header-text">
+        <h1 class="title is-4" style="color: #2c3e50;">Belajar Inovasi</h1>
         <p class="subtitle is-6 has-text-grey">Sistem Informasi Akademik & Kehadiran</p>
       </div>
       <div class="is-flex is-align-items-center">
         <img id="user-foto" src="https://ui-avatars.com/api/?name=User&background=random" class="profile-pic" alt="Profil">
-        <div>
+        <div class="has-text-left">
           <p class="has-text-weight-bold" style="margin-bottom: 0; line-height: 1.2;" id="user-info"></p>
           <p class="is-size-7 has-text-grey" id="user-role" style="margin-bottom: 5px;"></p>
-          <button class="button is-small is-light rounded" onclick="openSettings()">Pengaturan Akun</button>
-          <button class="button is-small is-danger is-light rounded" onclick="logout()">Logout</button>
+          <div>
+            <button class="button is-small is-light rounded" onclick="openSettings()">Pengaturan Akun</button>
+            <button class="button is-small is-danger is-light rounded" onclick="logout()">Logout</button>
+          </div>
         </div>
       </div>
     </div>
@@ -135,7 +155,7 @@
       </div>
 
       <div id="dashboard-tab" class="tab-content is-active">
-        <h2 class="title is-4">Informasi Paket Les & Analitik Kehadiran</h2>
+        <h2 class="title is-4">Informasi Paket Les & Analitik</h2>
         <div class="columns is-multiline mt-3">
           <div class="column is-half">
             <div class="box">
@@ -150,18 +170,39 @@
             </div>
           </div>
         </div>
-        <div class="box mt-4">
-          <h3 class="subtitle is-6 has-text-weight-bold">Distribusi Siswa per Paket Les</h3>
-          <div class="table-container">
-            <table class="table is-fullwidth is-striped" id="tabel-distribusi-paket">
-              <thead><tr><th>Nama Paket Les</th><th>Jumlah Siswa Aktif</th></tr></thead>
-              <tbody></tbody>
-            </table>
+
+        <div class="columns">
+          <div class="column is-half">
+            <div class="box h-100">
+              <h3 class="subtitle is-6 has-text-weight-bold">Distribusi Siswa per Paket Les</h3>
+              <div class="table-container">
+                <table class="table is-fullwidth is-striped" id="tabel-distribusi-paket">
+                  <thead><tr><th>Nama Paket Les</th><th>Jumlah Siswa Aktif</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="box h-100">
+              <h3 class="subtitle is-6 has-text-weight-bold has-text-danger"><i class="fas fa-exclamation-triangle"></i> Peringatan Kehadiran (< 70%)</h3>
+              <p class="is-size-7 has-text-grey mb-2">Daftar siswa yang perlu diingatkan untuk didatangkan les.</p>
+              <div class="table-container">
+                <table class="table is-fullwidth is-striped" id="tabel-peringatan-kehadiran">
+                  <thead><tr><th>Nama Siswa</th><th>Paket</th><th>Persentase Hadir</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div id="kehadiran-tab" class="tab-content">
+        <article class="message is-info is-small mb-4"><div class="message-body">
+          Siswa yang memiliki ulangan <strong>besok atau lusa</strong> akan otomatis berada di posisi teratas dan berwarna merah berdenyut.
+        </div></article>
+        
         <div class="columns is-multiline">
           <div class="column is-one-third"><h2 class="title is-5">Input Kehadiran</h2></div>
           <div class="column is-one-third"><h2 class="title is-5 has-text-success">Hadir Hari Ini</h2></div>
@@ -267,7 +308,7 @@
       </div>
 
       <div id="cetak-laporan-tab" class="tab-content">
-        <h2 class="title is-5">Pusat Rekapitulasi Data</h2>
+        <h2 class="title is-5">Pusat Rekapitulasi Data & Export Excel</h2>
         <div class="columns">
           <div class="column is-half">
             <div class="box">
@@ -275,7 +316,7 @@
               <div class="field"><div class="control"><div class="select is-fullwidth"><select id="rekap-absensi-siswa-select" onchange="updateRekapAbsensiDashboard()"><option value="">-- Pilih Siswa --</option></select></div></div></div>
               <div id="rekap-absensi-box" style="display:none;" class="mt-3">
                 <p><strong>Hadir: </strong><span id="rekap-hadir" class="has-text-success">0</span> | <strong>Tidak: </strong><span id="rekap-tidak" class="has-text-danger">0</span></p>
-                <div class="table-container mt-2" style="max-height:200px; overflow-y:auto;">
+                <div class="table-container mt-2" style="max-height:250px; overflow-y:auto;">
                   <table class="table is-narrow is-fullwidth is-size-7" id="rekap-absensi-table"><tbody></tbody></table>
                 </div>
               </div>
@@ -283,12 +324,13 @@
           </div>
           <div class="column is-half">
             <div class="box">
-              <h3 class="subtitle is-6">Rekap Nilai Kelas</h3>
+              <h3 class="subtitle is-6">Rekap Nilai Kelas (Download)</h3>
               <div class="columns is-mobile">
                 <div class="column"><div class="select is-fullwidth is-small"><select id="cetak-guru-select"><option value="">Pilih Guru</option></select></div></div>
                 <div class="column"><div class="select is-fullwidth is-small"><select id="cetak-mapel-select" onchange="updateCetakLaporanPreview()"><option value="">Pilih Mapel</option></select></div></div>
               </div>
               <div id="cetak-preview-container" style="display:none;" class="mt-2">
+                <button class="button is-success is-small is-fullwidth mb-3" onclick="exportToExcel()"><i class="fas fa-file-excel mr-2"></i> Download Excel</button>
                 <div class="table-container" style="max-height:200px; overflow-y:auto;">
                   <table class="table is-narrow is-striped is-fullwidth is-size-7" id="rekap-nilai-cetak-table">
                     <thead><tr><th>Nama</th><th>Rata-rata</th></tr></thead><tbody></tbody>
@@ -308,8 +350,16 @@
     <div class="modal-card" style="border-radius: 12px; overflow: hidden;">
       <header class="modal-card-head"><p class="modal-card-title is-size-5">Pengaturan Akun</p></header>
       <section class="modal-card-body">
-        <div class="field"><label class="label">URL Foto Profil Baru</label><div class="control"><input class="input" type="url" id="setting-foto" placeholder="https://contoh.com/foto.jpg"></div></div>
-        <div class="field"><label class="label">Password Baru (Kosongi jika tidak diubah)</label><div class="control"><input class="input" type="password" id="setting-pass" placeholder="***"></div></div>
+        <div class="field">
+          <label class="label">Upload Foto Profil Baru (Maks 5MB)</label>
+          <div class="control">
+            <input class="input" type="file" id="setting-foto-file" accept="image/*">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Password Baru (Kosongi jika tidak diubah)</label>
+          <div class="control"><input class="input" type="password" id="setting-pass" placeholder="***"></div>
+        </div>
       </section>
       <footer class="modal-card-foot">
         <button class="button is-success" onclick="saveSettings(this)">Simpan Perubahan</button>
@@ -321,7 +371,7 @@
 <script>
   // =================================================================
   // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwekbc3X4CXM-9wUNPsHcNRsXheCB53sTJdmanzM11pGGpotf28jK3_1Iqm7kv1arCHCw/exec'; 
+  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz8xYdJdwMOtW2q2DebxCrAtdnVXNqol9Uleve60R61G6OhhYEgQAngYbGRJbizTP4kfg/exec'; 
   // =================================================================
 
   var appData = {};
@@ -422,11 +472,10 @@
       if (data.error) throw new Error(data.error);
       
       appData = data;
-      // Data format adjustment
       const allSiswa = data.allSiswaData.slice(1).map(s => ({
         id: s[0], nama: s[1], jenjang: s[2], guruUsernames: s[3], status: s[4] || 'Aktif', paket: s[5] || 'Reguler'
       }));
-      filteredSiswa = allSiswa; // Sudah difilter di backend
+      filteredSiswa = allSiswa;
       
       document.getElementById('app').style.display = 'block';
       document.getElementById('user-info').textContent = currentUser.nama;
@@ -441,17 +490,17 @@
     }
   }
 
-  // --- Dashboard Paket & Chart ---
+  // --- Dashboard Paket & Warning Kehadiran ---
   function renderDashboardPaket() {
     const aktifSiswa = filteredSiswa.filter(s => s.status === 'Aktif');
     
-    // Distribusi Paket
+    // 1. Distribusi Paket
     const paketDist = {};
     aktifSiswa.forEach(s => { paketDist[s.paket] = (paketDist[s.paket] || 0) + 1; });
-    const tb = document.querySelector('#tabel-distribusi-paket tbody'); tb.innerHTML = '';
-    Object.keys(paketDist).forEach(k => tb.insertRow().innerHTML = `<td>${k}</td><td>${paketDist[k]} Siswa</td>`);
+    const tbDist = document.querySelector('#tabel-distribusi-paket tbody'); tbDist.innerHTML = '';
+    Object.keys(paketDist).forEach(k => tbDist.insertRow().innerHTML = `<td>${k}</td><td>${paketDist[k]} Siswa</td>`);
 
-    // Proses data kehadiran berdasarkan paket
+    // 2. Data Grafik
     const hData = appData.allKehadiranData.slice(1).filter(k => k[5] === 'Datang');
     const now = new Date();
     const d7 = new Date(now); d7.setDate(now.getDate() - 7);
@@ -462,16 +511,32 @@
 
     hData.forEach(row => {
       const d = new Date(row[1]);
-      const siswaId = row[2];
-      const s = aktifSiswa.find(x => x.id === siswaId);
+      const s = aktifSiswa.find(x => x.id === row[2]);
       if(!s) return;
-      
       if(d >= d7) aggMinggu[s.paket] += 1;
       if(d.getMonth() === m && d.getFullYear() === y) aggBulan[s.paket] += 1;
     });
 
     drawChart('chart-mingguan', chartMingguan, Object.keys(aggMinggu), Object.values(aggMinggu), 'rgba(72, 199, 142, 0.7)');
     drawChart('chart-bulanan', chartBulanan, Object.keys(aggBulan), Object.values(aggBulan), 'rgba(62, 142, 208, 0.7)');
+
+    // 3. Peringatan Kehadiran Rendah (<70%)
+    const tbPeringatan = document.querySelector('#tabel-peringatan-kehadiran tbody');
+    tbPeringatan.innerHTML = '';
+    
+    // Filter siswa sesuai hak akses guru
+    const myStudents = aktifSiswa.filter(s => currentUser.role === 'Pemilik' || currentUser.role.startsWith('Pengawas') || s.guruUsernames.toLowerCase().includes(currentUser.username.toLowerCase()));
+
+    myStudents.forEach(s => {
+      const atts = appData.allKehadiranData.slice(1).filter(r => r[2] === s.id);
+      if(atts.length > 0) {
+        const hadir = atts.filter(r => r[5] === 'Datang').length;
+        const pct = (hadir / atts.length) * 100;
+        if(pct < 70) {
+          tbPeringatan.insertRow().innerHTML = `<td>${s.nama}</td><td>${s.paket}</td><td><strong class="has-text-danger">${pct.toFixed(0)}%</strong></td>`;
+        }
+      }
+    });
   }
 
   function drawChart(canvasId, chartRef, labels, data, color) {
@@ -484,20 +549,17 @@
     });
   }
 
-  // --- Kehadiran UI ---
+  // --- Kehadiran UI (Dengan Pendorongan Data Ulangan Besok/Lusa) ---
   function updateKehadiranUI() {
     const activeSiswa = filteredSiswa.filter(s => s.status === 'Aktif');
     const todayKehadiran = appData.allKehadiranData.slice(1).filter(row => new Date(row[1]).toLocaleDateString() === today.toLocaleDateString());
-    const hadirIds = todayKehadiran.map(r => r[2]);
     
-    // Filter by Jenjang Setup
     const jenjangs = [...new Set(activeSiswa.map(s => s.jenjang))].sort();
     const fJenjang = document.getElementById('filter-jenjang-kehadiran');
     fJenjang.innerHTML = '<option value="">Semua Jenjang</option>' + jenjangs.map(j => `<option value="${j}">${j}</option>`).join('');
     
-    filterKehadiran(); // Calls the populator logic
+    filterKehadiran(); 
     
-    // Fill Hadir/Tidak tables
     const tbodyHadir = document.getElementById('kehadiran-hadir-table');
     const tbodyTidak = document.getElementById('kehadiran-tidak-hadir-table');
     tbodyHadir.innerHTML = ''; tbodyTidak.innerHTML = '';
@@ -515,31 +577,37 @@
     let list = filteredSiswa.filter(s => s.status === 'Aktif' && !hadirIds.includes(s.id));
     if(fVal) list = list.filter(s => s.jenjang === fVal);
     
-    const tbody = document.getElementById('kehadiran-input-table');
-    tbody.innerHTML = '';
-    
-    // Warning logic based on dates
-    const isFriday = today.getDay() === 5;
+    // Logika Mendorong Siswa Ulangan Besok/Lusa ke Atas
     const tm = new Date(today); tm.setDate(today.getDate() + 1);
-    const nm = new Date(today); if(isFriday) nm.setDate(today.getDate() + 3);
-    const tmStr = tm.toLocaleDateString(); const nmStr = nm.toLocaleDateString();
+    const lusa = new Date(today); lusa.setDate(today.getDate() + 2);
+    const tmStr = tm.toLocaleDateString();
+    const lusaStr = lusa.toLocaleDateString();
 
     list.forEach(s => {
       const uls = appData.allNilaiData.slice(1).filter(n => n[2] === s.id && n[5] === '');
-      const uBesok = uls.some(n => new Date(n[1]).toLocaleDateString() === tmStr);
-      const uSenin = isFriday && uls.some(n => new Date(n[1]).toLocaleDateString() === nmStr);
-      const hc = (uBesok || uSenin) ? 'has-text-danger has-text-weight-bold' : '';
+      s.hasUrgentExam = uls.some(n => {
+        const d = new Date(n[1]).toLocaleDateString();
+        return d === tmStr || d === lusaStr;
+      });
+    });
 
+    list.sort((a, b) => (b.hasUrgentExam === true) - (a.hasUrgentExam === true));
+    
+    const tbody = document.getElementById('kehadiran-input-table');
+    tbody.innerHTML = '';
+    
+    list.forEach(s => {
+      const hc = s.hasUrgentExam ? 'pulse-warning' : '';
       tbody.insertRow().innerHTML = `
         <td class="${hc}">${s.nama} <br><span class="is-size-7 has-text-grey">${s.paket}</span></td>
-        <td>
+        <td class="${hc}">
           <div class="control">
             <label class="radio is-size-7"><input type="radio" name="st-${s.id}" value="Datang" onchange="document.getElementById('ket-${s.id}').style.display='none'" checked>Hadir</label><br>
             <label class="radio is-size-7"><input type="radio" name="st-${s.id}" value="Tidak Datang" onchange="document.getElementById('ket-${s.id}').style.display='block'">T. Hadir</label>
           </div>
           <input class="input is-small mt-1" type="text" id="ket-${s.id}" style="display:none;" placeholder="Ket.">
         </td>
-        <td><button class="button is-small is-primary is-light" onclick="submitKehadiran('${s.id}', '${s.nama}', '${s.jenjang}', this)"><i class="fas fa-check"></i></button></td>
+        <td class="${hc}"><button class="button is-small is-primary is-light" onclick="submitKehadiran('${s.id}', '${s.nama}', '${s.jenjang}', this)"><i class="fas fa-check"></i></button></td>
       `;
     });
   }
@@ -573,7 +641,11 @@
       notify(res.message);
       appData.allLaporanData.push(res.newRow);
       renderRiwayatLaporanTable();
-      document.getElementById('materi-input').value = ''; document.getElementById('catatan-input').value = '';
+      
+      // Clear forms
+      document.getElementById('siswa-laporan-select').value = '';
+      document.getElementById('materi-input').value = ''; 
+      document.getElementById('catatan-input').value = '';
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -600,6 +672,13 @@
       notify(res.message);
       appData.allNilaiData.push(res.newRow);
       renderJadwalUlangan();
+      
+      // Clear forms after saving
+      document.getElementById('siswa-jadwal-select').value = '';
+      document.getElementById('tanggal-jadwal-input').value = '';
+      document.getElementById('mapel-jadwal-input').value = '';
+      document.getElementById('keterangan-jadwal-input').value = '';
+
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -640,6 +719,12 @@
       const idx = appData.allNilaiData.findIndex(r => r[0] === id);
       if(idx > -1) appData.allNilaiData[idx][5] = nl;
       renderNilaiTab();
+
+      // Clear forms
+      document.getElementById('jadwal-nilai-select').value = '';
+      document.getElementById('nilai-input').value = '';
+      document.getElementById('nilai-form').style.display = 'none';
+
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -661,6 +746,11 @@
       appData.allSiswaData.push(res.newRow);
       filteredSiswa.push({ id: res.newRow[0], nama: nm, jenjang: jnj, guruUsernames: gu, status: 'Aktif', paket: pkt });
       renderAllSiswaTable();
+      
+      // Clear forms
+      document.getElementById('ns-nama').value = '';
+      document.getElementById('ns-guru').value = '';
+
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -738,24 +828,64 @@
     box.style.display = 'block';
   }
 
-  // --- Settings UI ---
-  function openSettings() {
-    document.getElementById('settings-modal').classList.add('is-active');
+  // Fungsi Export HTML Table ke file Excel (.xlsx) menggunakan SheetJS
+  function exportToExcel() {
+    const table = document.getElementById("rekap-nilai-cetak-table");
+    const mapel = document.getElementById('cetak-mapel-select').value;
+    if(!mapel) return notify('Pilih Mapel terlebih dahulu!', 'warning');
+
+    const wb = XLSX.utils.table_to_book(table, {sheet: "Nilai " + mapel});
+    XLSX.writeFile(wb, `Laporan_Nilai_${mapel}_Belajar_Inovasi.xlsx`);
   }
+
+  // --- Settings UI ---
+  function openSettings() { document.getElementById('settings-modal').classList.add('is-active'); }
   function closeModal(id) { document.getElementById(id).classList.remove('is-active'); }
   
   async function saveSettings(btn) {
-    const nf = document.getElementById('setting-foto').value.trim();
     const np = document.getElementById('setting-pass').value.trim();
+    const fileInput = document.getElementById('setting-foto-file');
+    
+    let fileData = null;
+    let fileName = null;
+    let mimeType = null;
+
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      // Validasi maks 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        return notify('Ukuran foto tidak boleh lebih dari 5MB!', 'error');
+      }
+      
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+        reader.readAsDataURL(file);
+      });
+      
+      fileData = base64;
+      fileName = file.name;
+      mimeType = file.type;
+    }
+
     btn.classList.add('is-loading');
     
     try {
-      const res = await apiCall('updateProfile', { newFoto: nf, newPassword: np });
+      const res = await apiCall('updateProfile', { newPassword: np, fileData: fileData, fileName: fileName, mimeType: mimeType });
       if(res.error) throw new Error(res.error);
       notify(res.message);
-      if(nf) { currentUser.foto = nf; document.getElementById('user-foto').src = nf; }
+      
+      if(res.foto) { 
+        currentUser.foto = res.foto; 
+        document.getElementById('user-foto').src = res.foto; 
+      }
       localStorage.setItem('bi_session', JSON.stringify(currentUser));
       closeModal('settings-modal');
+      
+      // Bersihkan form upload
+      document.getElementById('setting-foto-file').value = '';
+      document.getElementById('setting-pass').value = '';
+      
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
