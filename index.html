@@ -31,14 +31,11 @@
       margin-bottom: 2rem; padding: 1.5rem; 
     }
     
-    /* Perbaikan Header agar tidak tumpang tindih */
     .header-bar { 
       display: flex; justify-content: space-between; align-items: center; 
       flex-wrap: wrap; margin-bottom: 1.5rem; gap: 15px;
     }
-    .header-text {
-      display: flex; flex-direction: column;
-    }
+    .header-text { display: flex; flex-direction: column; }
     .header-text .title { margin-bottom: 0.2rem !important; }
     .header-text .subtitle { margin-top: 0 !important; }
 
@@ -46,13 +43,20 @@
     .tabs.is-toggle li.is-active a { color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
     .tabs.is-toggle li:hover a { background: rgba(255,255,255,0.9); }
     
-    .tabs.is-toggle li:nth-child(1) a { background-color: rgba(62, 142, 208, 0.7); } .tabs.is-toggle li:nth-child(1).is-active a { background-color: #3e8ed0; }
-    .tabs.is-toggle li:nth-child(2) a { background-color: rgba(72, 199, 142, 0.7); } .tabs.is-toggle li:nth-child(2).is-active a { background-color: #48c78e; }
-    .tabs.is-toggle li:nth-child(3) a { background-color: rgba(255, 221, 87, 0.7); color: #333;} .tabs.is-toggle li:nth-child(3).is-active a { background-color: #ffdd57; color: #333;}
-    .tabs.is-toggle li:nth-child(4) a { background-color: rgba(165, 94, 234, 0.7); } .tabs.is-toggle li:nth-child(4).is-active a { background-color: #a55eea; }
-    .tabs.is-toggle li:nth-child(5) a { background-color: rgba(241, 70, 104, 0.7); } .tabs.is-toggle li:nth-child(5).is-active a { background-color: #f14668; }
-    .tabs.is-toggle li:nth-child(6) a { background-color: rgba(32, 156, 238, 0.7); } .tabs.is-toggle li:nth-child(6).is-active a { background-color: #209cee; }
-    .tabs.is-toggle li:nth-child(7) a { background-color: rgba(50, 115, 220, 0.7); } .tabs.is-toggle li:nth-child(7).is-active a { background-color: #3273dc; }
+    /* Pewarnaan Tab Sesuai Request & Gambar */
+    .tabs.is-toggle li[data-target="dashboard-tab"] a { background-color: rgba(62, 142, 208, 0.7); } .tabs.is-toggle li[data-target="dashboard-tab"].is-active a { background-color: #3e8ed0; }
+    .tabs.is-toggle li[data-target="kehadiran-tab"] a { background-color: rgba(72, 199, 142, 0.7); } .tabs.is-toggle li[data-target="kehadiran-tab"].is-active a { background-color: #48c78e; }
+    .tabs.is-toggle li[data-target="laporan-tab"] a { background-color: rgba(255, 221, 87, 0.7); color: #333;} .tabs.is-toggle li[data-target="laporan-tab"].is-active a { background-color: #ffdd57; color: #333;}
+    .tabs.is-toggle li[data-target="jadwal-ulangan-tab"] a { background-color: rgba(165, 94, 234, 0.7); } .tabs.is-toggle li[data-target="jadwal-ulangan-tab"].is-active a { background-color: #a55eea; }
+    .tabs.is-toggle li[data-target="nilai-tab"] a { background-color: rgba(241, 70, 104, 0.7); } .tabs.is-toggle li[data-target="nilai-tab"].is-active a { background-color: #f14668; }
+    
+    /* Tab Merah & Biru Khusus Rekap/Cetak */
+    .tabs.is-toggle li[data-target="rekap-absensi-tab"] a { background-color: rgba(220, 53, 69, 0.7); color: white; } 
+    .tabs.is-toggle li[data-target="rekap-absensi-tab"].is-active a { background-color: #dc3545; color: white; }
+    .tabs.is-toggle li[data-target="cetak-laporan-tab"] a { background-color: rgba(32, 156, 238, 0.7); color: white;} 
+    .tabs.is-toggle li[data-target="cetak-laporan-tab"].is-active a { background-color: #209cee; color: white; }
+    
+    .tabs.is-toggle li[data-target="manajemen-siswa-tab"] a { background-color: rgba(50, 115, 220, 0.7); color: white;} .tabs.is-toggle li[data-target="manajemen-siswa-tab"].is-active a { background-color: #3273dc; }
     
     .tabs ul { border-bottom: none; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
     .tabs li { flex-shrink: 0; }
@@ -70,16 +74,26 @@
     
     .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-right: 15px;}
     
-    /* Efek Denyut untuk Ulangan Besok/Lusa */
     @keyframes pulse-urgent {
       0% { box-shadow: 0 0 0 0 rgba(241, 70, 104, 0.6); }
       70% { box-shadow: 0 0 0 10px rgba(241, 70, 104, 0); }
       100% { box-shadow: 0 0 0 0 rgba(241, 70, 104, 0); }
     }
-    .pulse-warning {
-      animation: pulse-urgent 2s infinite;
-      background-color: #ffe5e5 !important;
-      border-left: 5px solid #f14668;
+    .pulse-warning { animation: pulse-urgent 2s infinite; background-color: #ffe5e5 !important; border-left: 5px solid #f14668; }
+
+    /* LAYOUT PRINT KHUSUS (MENGHILANGKAN UI) */
+    @media print {
+      body { background: white !important; padding: 0 !important; margin: 0 !important; }
+      #app, .section, .box { background: white !important; box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; }
+      .header-bar, .tabs, .modal, .button, .field, select, input, label, hr { display: none !important; }
+      .tab-content { display: none !important; padding: 0 !important; }
+      .tab-content.is-active { display: block !important; }
+      .table { width: 100% !important; border-collapse: collapse !important; }
+      .table th, .table td { border: 1px solid #ddd !important; padding: 8px !important; color: black !important; }
+      
+      /* Sembunyikan container dropdown agar rapi saat print */
+      #cetak-guru-select, #cetak-mapel-select, #rekap-absensi-siswa-select { display: none !important; }
+      .print-header-only { display: block !important; text-align: center; margin-bottom: 20px; font-weight: bold; font-size: 1.2rem;}
     }
 
     @media screen and (max-width: 768px) {
@@ -144,13 +158,14 @@
     <div id="main-content" class="section">
       <div class="tabs is-toggle is-fullwidth">
         <ul>
-          <li class="is-active" data-target="dashboard-tab"><a><span class="icon"><i class="fas fa-chart-pie"></i></span><span>Dasbor Paket</span></a></li>
+          <li class="is-active" data-target="dashboard-tab"><a><span class="icon"><i class="fas fa-chart-pie"></i></span><span>Dasbor</span></a></li>
           <li data-target="kehadiran-tab"><a><span class="icon"><i class="fas fa-user-check"></i></span><span>Kehadiran</span></a></li>
-          <li data-target="laporan-tab"><a><span class="icon"><i class="fas fa-book-open"></i></span><span>Laporan Belajar</span></a></li>
+          <li data-target="laporan-tab"><a><span class="icon"><i class="fas fa-book-open"></i></span><span>Lap. Belajar</span></a></li>
           <li data-target="jadwal-ulangan-tab"><a><span class="icon"><i class="fas fa-calendar-alt"></i></span><span>Jadwal Ulangan</span></a></li>
           <li data-target="nilai-tab"><a><span class="icon"><i class="fas fa-medal"></i></span><span>Nilai Siswa</span></a></li>
-          <li data-target="cetak-laporan-tab"><a><span class="icon"><i class="fas fa-print"></i></span><span>Cetak / Rekap</span></a></li>
-          <li data-target="manajemen-siswa-tab"><a><span class="icon"><i class="fas fa-users-cog"></i></span><span>Siswa Baru</span></a></li>
+          <li data-target="rekap-absensi-tab"><a><span class="icon"><i class="fas fa-chart-line"></i></span><span>Rekap Absensi Siswa</span></a></li>
+          <li data-target="cetak-laporan-tab"><a><span class="icon"><i class="fas fa-print"></i></span><span>Cetak Laporan</span></a></li>
+          <li data-target="manajemen-siswa-tab"><a><span class="icon"><i class="fas fa-users-cog"></i></span><span>Manajemen Siswa</span></a></li>
         </ul>
       </div>
 
@@ -281,6 +296,70 @@
         </div>
       </div>
 
+      <div id="rekap-absensi-tab" class="tab-content">
+        <h2 class="title is-5">Rekap Absensi Siswa</h2>
+        <div class="box">
+          <div class="field">
+            <label class="label">Pilih Siswa</label>
+            <div class="control"><div class="select is-fullwidth"><select id="rekap-absensi-siswa-select" onchange="updateRekapAbsensiDashboard()"><option value="">-- Pilih Siswa --</option></select></div></div>
+          </div>
+          <div id="rekap-absensi-box" style="display:none;" class="mt-4">
+            <h3 class="subtitle is-6 print-header-only" style="display:none;">Laporan Absensi: <span id="print-nama-absensi"></span></h3>
+            <p class="mb-2"><strong>Detail Absensi <span id="rekap-absensi-nama"></span></strong></p>
+            <div class="table-container">
+              <table class="table is-striped is-fullwidth is-narrow" id="rekap-absensi-table">
+                <thead><tr><th>Tanggal</th><th>Status</th><th>Keterangan</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="mt-3"><strong>Total Hadir: <span id="rekap-hadir">0</span></strong></p>
+            <p><strong>Total Tidak Hadir: <span id="rekap-tidak">0</span></strong></p>
+            <button class="button is-info is-fullwidth mt-4" onclick="window.print()"><i class="fas fa-print mr-2"></i> Cetak Rekap Absensi</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="cetak-laporan-tab" class="tab-content">
+        <h2 class="title is-5">Cetak Laporan Nilai</h2>
+        <div class="box">
+          <div class="columns is-multiline">
+            <div class="column is-half">
+              <div class="field"><label class="label">Pilih Guru</label><div class="control"><div class="select is-fullwidth"><select id="cetak-guru-select"></select></div></div></div>
+            </div>
+            <div class="column is-half">
+              <div class="field"><label class="label">Pilih Pelajaran</label><div class="control"><div class="select is-fullwidth"><select id="cetak-mapel-select" onchange="updateCetakLaporanPreview()"><option value="">-- Pilih Pelajaran --</option></select></div></div></div>
+            </div>
+          </div>
+          
+          <div id="cetak-preview-container" style="display:none;" class="mt-4">
+            <h3 class="subtitle is-6 print-header-only" style="display:none;">Cetak Laporan Nilai <span id="print-nama-mapel"></span></h3>
+            <p class="mb-2"><strong>Pratinjau Laporan Nilai <span id="report-mapel-nama"></span></strong></p>
+            
+            <div class="table-container">
+              <table class="table is-striped is-fullwidth is-narrow" id="rekap-nilai-cetak-table">
+                <thead><tr><th>Nama</th><th>Ulangan 1</th><th>Ulangan 2</th><th>Ulangan 3</th><th>Sumatif</th><th>PAS</th><th>Rata-rata</th><th>Raport</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div id="persentase-remedial" class="mt-3 mb-3 has-text-danger has-text-weight-bold" style="display:none;"></div>
+
+            <div class="mt-4">
+              <canvas id="cetak-nilai-chart" style="max-height: 400px;"></canvas>
+            </div>
+            
+            <div class="columns is-mobile mt-4">
+              <div class="column">
+                <button class="button is-info is-fullwidth" onclick="window.print()"><i class="fas fa-print mr-2"></i> Cetak Laporan Nilai</button>
+              </div>
+              <div class="column">
+                <button class="button is-success is-fullwidth" onclick="exportToExcel()"><i class="fas fa-file-excel mr-2"></i> Download Excel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="manajemen-siswa-tab" class="tab-content">
         <h2 class="title is-5">Registrasi Siswa Baru & Pengaturan</h2>
         <div class="box">
@@ -305,41 +384,6 @@
         <div class="table-container mt-4"><table class="table is-striped is-fullwidth" id="daftar-siswa-table">
           <thead><tr><th>Nama</th><th>Paket</th><th>Guru</th><th>Status</th><th>Aksi</th></tr></thead><tbody></tbody>
         </table></div>
-      </div>
-
-      <div id="cetak-laporan-tab" class="tab-content">
-        <h2 class="title is-5">Pusat Rekapitulasi Data & Export Excel</h2>
-        <div class="columns">
-          <div class="column is-half">
-            <div class="box">
-              <h3 class="subtitle is-6">Rekap Absensi Individu</h3>
-              <div class="field"><div class="control"><div class="select is-fullwidth"><select id="rekap-absensi-siswa-select" onchange="updateRekapAbsensiDashboard()"><option value="">-- Pilih Siswa --</option></select></div></div></div>
-              <div id="rekap-absensi-box" style="display:none;" class="mt-3">
-                <p><strong>Hadir: </strong><span id="rekap-hadir" class="has-text-success">0</span> | <strong>Tidak: </strong><span id="rekap-tidak" class="has-text-danger">0</span></p>
-                <div class="table-container mt-2" style="max-height:250px; overflow-y:auto;">
-                  <table class="table is-narrow is-fullwidth is-size-7" id="rekap-absensi-table"><tbody></tbody></table>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="column is-half">
-            <div class="box">
-              <h3 class="subtitle is-6">Rekap Nilai Kelas (Download)</h3>
-              <div class="columns is-mobile">
-                <div class="column"><div class="select is-fullwidth is-small"><select id="cetak-guru-select"><option value="">Pilih Guru</option></select></div></div>
-                <div class="column"><div class="select is-fullwidth is-small"><select id="cetak-mapel-select" onchange="updateCetakLaporanPreview()"><option value="">Pilih Mapel</option></select></div></div>
-              </div>
-              <div id="cetak-preview-container" style="display:none;" class="mt-2">
-                <button class="button is-success is-small is-fullwidth mb-3" onclick="exportToExcel()"><i class="fas fa-file-excel mr-2"></i> Download Excel</button>
-                <div class="table-container" style="max-height:200px; overflow-y:auto;">
-                  <table class="table is-narrow is-striped is-fullwidth is-size-7" id="rekap-nilai-cetak-table">
-                    <thead><tr><th>Nama</th><th>Rata-rata</th></tr></thead><tbody></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -371,7 +415,7 @@
 <script>
   // =================================================================
   // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz8xYdJdwMOtW2q2DebxCrAtdnVXNqol9Uleve60R61G6OhhYEgQAngYbGRJbizTP4kfg/exec'; 
+  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyhxh9JrXdOZFqhdBX-LaNsDa8zMSLnEAfrTG1NFOABh2DvhEMt5gx-jSOj7oydz1eKqQ/exec'; 
   // =================================================================
 
   var appData = {};
@@ -379,7 +423,7 @@
   var currentUser = null; 
   var today = new Date();
   
-  let chartMingguan, chartBulanan;
+  let chartMingguan, chartBulanan, cetakNilaiChart;
 
   const notify = (msg, icon = 'success') => {
     Swal.fire({ text: msg, icon: icon, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true });
@@ -416,6 +460,7 @@
         if (el.dataset.target === 'jadwal-ulangan-tab') renderJadwalUlangan();
         if (el.dataset.target === 'nilai-tab') renderNilaiTab();
         if (el.dataset.target === 'manajemen-siswa-tab') renderAllSiswaTable();
+        if (el.dataset.target === 'rekap-absensi-tab') renderRekapAbsensiTab();
         if (el.dataset.target === 'cetak-laporan-tab') renderCetakLaporanTab();
       });
     });
@@ -493,14 +538,11 @@
   // --- Dashboard Paket & Warning Kehadiran ---
   function renderDashboardPaket() {
     const aktifSiswa = filteredSiswa.filter(s => s.status === 'Aktif');
-    
-    // 1. Distribusi Paket
     const paketDist = {};
     aktifSiswa.forEach(s => { paketDist[s.paket] = (paketDist[s.paket] || 0) + 1; });
     const tbDist = document.querySelector('#tabel-distribusi-paket tbody'); tbDist.innerHTML = '';
     Object.keys(paketDist).forEach(k => tbDist.insertRow().innerHTML = `<td>${k}</td><td>${paketDist[k]} Siswa</td>`);
 
-    // 2. Data Grafik
     const hData = appData.allKehadiranData.slice(1).filter(k => k[5] === 'Datang');
     const now = new Date();
     const d7 = new Date(now); d7.setDate(now.getDate() - 7);
@@ -520,11 +562,8 @@
     drawChart('chart-mingguan', chartMingguan, Object.keys(aggMinggu), Object.values(aggMinggu), 'rgba(72, 199, 142, 0.7)');
     drawChart('chart-bulanan', chartBulanan, Object.keys(aggBulan), Object.values(aggBulan), 'rgba(62, 142, 208, 0.7)');
 
-    // 3. Peringatan Kehadiran Rendah (<70%)
     const tbPeringatan = document.querySelector('#tabel-peringatan-kehadiran tbody');
     tbPeringatan.innerHTML = '';
-    
-    // Filter siswa sesuai hak akses guru
     const myStudents = aktifSiswa.filter(s => currentUser.role === 'Pemilik' || currentUser.role.startsWith('Pengawas') || s.guruUsernames.toLowerCase().includes(currentUser.username.toLowerCase()));
 
     myStudents.forEach(s => {
@@ -532,9 +571,7 @@
       if(atts.length > 0) {
         const hadir = atts.filter(r => r[5] === 'Datang').length;
         const pct = (hadir / atts.length) * 100;
-        if(pct < 70) {
-          tbPeringatan.insertRow().innerHTML = `<td>${s.nama}</td><td>${s.paket}</td><td><strong class="has-text-danger">${pct.toFixed(0)}%</strong></td>`;
-        }
+        if(pct < 70) tbPeringatan.insertRow().innerHTML = `<td>${s.nama}</td><td>${s.paket}</td><td><strong class="has-text-danger">${pct.toFixed(0)}%</strong></td>`;
       }
     });
   }
@@ -542,14 +579,10 @@
   function drawChart(canvasId, chartRef, labels, data, color) {
     const ctx = document.getElementById(canvasId);
     if(Chart.getChart(canvasId)) Chart.getChart(canvasId).destroy();
-    new Chart(ctx, {
-      type: 'bar',
-      data: { labels: labels, datasets: [{ label: 'Total Kehadiran', data: data, backgroundColor: color, borderRadius: 5 }] },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-    });
+    new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Total Kehadiran', data: data, backgroundColor: color, borderRadius: 5 }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
   }
 
-  // --- Kehadiran UI (Dengan Pendorongan Data Ulangan Besok/Lusa) ---
+  // --- Kehadiran UI ---
   function updateKehadiranUI() {
     const activeSiswa = filteredSiswa.filter(s => s.status === 'Aktif');
     const todayKehadiran = appData.allKehadiranData.slice(1).filter(row => new Date(row[1]).toLocaleDateString() === today.toLocaleDateString());
@@ -577,11 +610,9 @@
     let list = filteredSiswa.filter(s => s.status === 'Aktif' && !hadirIds.includes(s.id));
     if(fVal) list = list.filter(s => s.jenjang === fVal);
     
-    // Logika Mendorong Siswa Ulangan Besok/Lusa ke Atas
     const tm = new Date(today); tm.setDate(today.getDate() + 1);
     const lusa = new Date(today); lusa.setDate(today.getDate() + 2);
-    const tmStr = tm.toLocaleDateString();
-    const lusaStr = lusa.toLocaleDateString();
+    const tmStr = tm.toLocaleDateString(); const lusaStr = lusa.toLocaleDateString();
 
     list.forEach(s => {
       const uls = appData.allNilaiData.slice(1).filter(n => n[2] === s.id && n[5] === '');
@@ -641,11 +672,7 @@
       notify(res.message);
       appData.allLaporanData.push(res.newRow);
       renderRiwayatLaporanTable();
-      
-      // Clear forms
-      document.getElementById('siswa-laporan-select').value = '';
-      document.getElementById('materi-input').value = ''; 
-      document.getElementById('catatan-input').value = '';
+      document.getElementById('siswa-laporan-select').value = ''; document.getElementById('materi-input').value = ''; document.getElementById('catatan-input').value = '';
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -672,13 +699,8 @@
       notify(res.message);
       appData.allNilaiData.push(res.newRow);
       renderJadwalUlangan();
-      
-      // Clear forms after saving
-      document.getElementById('siswa-jadwal-select').value = '';
-      document.getElementById('tanggal-jadwal-input').value = '';
-      document.getElementById('mapel-jadwal-input').value = '';
-      document.getElementById('keterangan-jadwal-input').value = '';
-
+      document.getElementById('siswa-jadwal-select').value = ''; document.getElementById('tanggal-jadwal-input').value = '';
+      document.getElementById('mapel-jadwal-input').value = ''; document.getElementById('keterangan-jadwal-input').value = '';
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -696,7 +718,6 @@
     appData.allNilaiData.slice(1).filter(n => n[5] === '').forEach(j => {
       jSelect.innerHTML += `<option value="${j[0]}|${j[3]}">${new Date(j[1]).toLocaleDateString()} - ${j[3]} (${j[4]})</option>`;
     });
-    
     jSelect.onchange = () => document.getElementById('nilai-form').style.display = jSelect.value ? 'block' : 'none';
     
     const tb = document.querySelector('#rekap-nilai-siswa-table tbody'); tb.innerHTML = '';
@@ -719,12 +740,7 @@
       const idx = appData.allNilaiData.findIndex(r => r[0] === id);
       if(idx > -1) appData.allNilaiData[idx][5] = nl;
       renderNilaiTab();
-
-      // Clear forms
-      document.getElementById('jadwal-nilai-select').value = '';
-      document.getElementById('nilai-input').value = '';
-      document.getElementById('nilai-form').style.display = 'none';
-
+      document.getElementById('jadwal-nilai-select').value = ''; document.getElementById('nilai-input').value = ''; document.getElementById('nilai-form').style.display = 'none';
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -735,7 +751,6 @@
     const jnj = document.getElementById('ns-jenjang').value;
     const pkt = document.getElementById('ns-paket').value;
     const gu = document.getElementById('ns-guru').value;
-    
     if(!nm || !gu) return notify('Nama dan Username Guru wajib diisi!', 'warning');
     btn.classList.add('is-loading');
     
@@ -746,11 +761,7 @@
       appData.allSiswaData.push(res.newRow);
       filteredSiswa.push({ id: res.newRow[0], nama: nm, jenjang: jnj, guruUsernames: gu, status: 'Aktif', paket: pkt });
       renderAllSiswaTable();
-      
-      // Clear forms
-      document.getElementById('ns-nama').value = '';
-      document.getElementById('ns-guru').value = '';
-
+      document.getElementById('ns-nama').value = ''; document.getElementById('ns-guru').value = '';
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
@@ -775,13 +786,9 @@
     } catch(e) { notify(e.message, 'error'); }
   }
 
-  // --- Cetak & Rekap UI ---
-  function renderCetakLaporanTab() {
+  // --- Rekap Absensi Siswa ---
+  function renderRekapAbsensiTab() {
     populateSelect('rekap-absensi-siswa-select', filteredSiswa.filter(s => s.status === 'Aktif'));
-    
-    const guruSelect = document.getElementById('cetak-guru-select');
-    const gurus = [...new Set(filteredSiswa.flatMap(s => s.guruUsernames.split(',').map(e => e.trim().toLowerCase())))].sort();
-    guruSelect.innerHTML = '<option value="">-- Pilih Guru --</option>' + gurus.map(g => `<option value="${g}">${g}</option>`).join('');
   }
 
   function updateRekapAbsensiDashboard() {
@@ -789,14 +796,17 @@
     const box = document.getElementById('rekap-absensi-box');
     if(!v) return box.style.display = 'none';
     
-    const [id] = v.split('|');
+    const [id, nama] = v.split('|');
+    document.getElementById('rekap-absensi-nama').textContent = nama;
+    document.getElementById('print-nama-absensi').textContent = nama;
+    
     const tb = document.querySelector('#rekap-absensi-table tbody'); tb.innerHTML = '';
-    const data = appData.allKehadiranData.slice(1).filter(r => r[2] === id);
+    const data = appData.allKehadiranData.slice(1).filter(r => r[2] === id).sort((a,b) => new Date(b[1]) - new Date(a[1]));
     
     let h = 0, t = 0;
     data.forEach(r => {
       r[5] === 'Datang' ? h++ : t++;
-      tb.insertRow().innerHTML = `<td>${new Date(r[1]).toLocaleDateString()}</td><td>${r[5]}</td>`;
+      tb.insertRow().innerHTML = `<td>${new Date(r[1]).toLocaleDateString()}</td><td>${r[5]}</td><td>${r[6] || '-'}</td>`;
     });
     
     document.getElementById('rekap-hadir').textContent = h;
@@ -804,9 +814,17 @@
     box.style.display = 'block';
   }
 
+  // --- Cetak Laporan Nilai (Video Style) ---
+  function renderCetakLaporanTab() {
+    const guruSelect = document.getElementById('cetak-guru-select');
+    const gurus = [...new Set(filteredSiswa.flatMap(s => s.guruUsernames.split(',').map(e => e.trim().toLowerCase())))].sort();
+    guruSelect.innerHTML = '<option value="">-- Pilih Guru --</option>' + gurus.map(g => `<option value="${g}">${g}</option>`).join('');
+  }
+
   function populateMapelByGuru(gu) {
     const mapels = [...new Set(appData.allNilaiData.slice(1).filter(n => n[7] === gu).map(n => n[4]))].sort();
-    document.getElementById('cetak-mapel-select').innerHTML = '<option value="">-- Pilih Mapel --</option>' + mapels.map(m => `<option value="${m}">${m}</option>`).join('');
+    document.getElementById('cetak-mapel-select').innerHTML = '<option value="">-- Pilih Pelajaran --</option>' + mapels.map(m => `<option value="${m}">${m}</option>`).join('');
+    document.getElementById('cetak-preview-container').style.display = 'none';
   }
 
   function updateCetakLaporanPreview() {
@@ -815,16 +833,79 @@
     const box = document.getElementById('cetak-preview-container');
     if(!gu || !mp) return box.style.display = 'none';
     
+    document.getElementById('report-mapel-nama').textContent = mp;
+    document.getElementById('print-nama-mapel').textContent = mp;
     const tb = document.querySelector('#rekap-nilai-cetak-table tbody'); tb.innerHTML = '';
-    const muridGuru = filteredSiswa.filter(s => s.guruUsernames.toLowerCase().includes(gu.toLowerCase()));
     
+    const muridGuru = filteredSiswa.filter(s => s.guruUsernames.toLowerCase().includes(gu.toLowerCase()));
+    let countBelow75 = 0;
+    let totalSiswaWithNilai = 0;
+    const labels = [];
+    const chartData = [];
+
+    const formatNilai = (val) => {
+      if (val === '' || val === null || val === undefined) return '';
+      return Number(val) < 75 ? `<span style="color:red; font-weight:bold;">${val}</span>` : val;
+    };
+
     muridGuru.forEach(s => {
-      const nilais = appData.allNilaiData.slice(1).filter(n => n[2] === s.id && n[4] === mp && n[5] !== '').map(n => Number(n[5]));
-      if(nilais.length > 0) {
-        const rata = (nilais.reduce((a,b)=>a+b,0) / nilais.length).toFixed(1);
-        tb.insertRow().innerHTML = `<td>${s.nama}</td><td><strong>${rata}</strong></td>`;
+      const nilaiSiswa = appData.allNilaiData.slice(1).filter(n => n[2] === s.id && n[4] === mp);
+      
+      const getNilai = (jenis) => nilaiSiswa.find(n => n[6] && n[6].toLowerCase().includes(jenis))?.[5] || '';
+      const ul1 = getNilai('ulangan 1');
+      const ul2 = getNilai('ulangan 2');
+      const ul3 = getNilai('ulangan 3');
+      const sumatif = getNilai('sumatif');
+      const pas = getNilai('pas');
+      
+      const allNilai = [ul1, ul2, ul3, sumatif, pas].filter(v => v !== '').map(Number);
+      const rataRata = allNilai.length > 0 ? (allNilai.reduce((a,b)=>a+b,0) / allNilai.length).toFixed(2) : '';
+      const raport = rataRata ? Math.round(rataRata) : '';
+
+      if (allNilai.length > 0) {
+        totalSiswaWithNilai++;
+        if (Number(rataRata) < 75) countBelow75++;
+      }
+
+      tb.insertRow().innerHTML = `
+        <td>${s.nama}</td>
+        <td>${formatNilai(ul1)}</td>
+        <td>${formatNilai(ul2)}</td>
+        <td>${formatNilai(ul3)}</td>
+        <td>${formatNilai(sumatif)}</td>
+        <td>${formatNilai(pas)}</td>
+        <td>${formatNilai(rataRata)}</td>
+        <td>${formatNilai(raport)}</td>
+      `;
+
+      labels.push(s.nama);
+      chartData.push(rataRata === '' ? 0 : Number(rataRata));
+    });
+
+    // Menghitung Presentase Siswa Remedial
+    const pctContainer = document.getElementById('persentase-remedial');
+    if (totalSiswaWithNilai > 0) {
+      const pct = ((countBelow75 / totalSiswaWithNilai) * 100).toFixed(1);
+      pctContainer.innerHTML = `Siswa dengan nilai rata-rata di bawah 75 (Perlu Remedial) : <span>${pct}%</span> (${countBelow75} dari ${totalSiswaWithNilai} Siswa)`;
+      pctContainer.style.display = 'block';
+    } else {
+      pctContainer.style.display = 'none';
+    }
+
+    // Render Chart
+    const ctx = document.getElementById('cetak-nilai-chart');
+    if(cetakNilaiChart) cetakNilaiChart.destroy();
+    cetakNilaiChart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ label: 'Rata-rata Nilai', data: chartData, backgroundColor: 'rgba(54, 162, 235, 0.5)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] },
+      options: { 
+        responsive: true, 
+        animation: false, // Matikan animasi untuk print yang baik
+        scales: { y: { beginAtZero: true, max: 100 } }, 
+        plugins: { legend: { display: false } } 
       }
     });
+
     box.style.display = 'block';
   }
 
@@ -833,7 +914,6 @@
     const table = document.getElementById("rekap-nilai-cetak-table");
     const mapel = document.getElementById('cetak-mapel-select').value;
     if(!mapel) return notify('Pilih Mapel terlebih dahulu!', 'warning');
-
     const wb = XLSX.utils.table_to_book(table, {sheet: "Nilai " + mapel});
     XLSX.writeFile(wb, `Laporan_Nilai_${mapel}_Belajar_Inovasi.xlsx`);
   }
@@ -846,26 +926,18 @@
     const np = document.getElementById('setting-pass').value.trim();
     const fileInput = document.getElementById('setting-foto-file');
     
-    let fileData = null;
-    let fileName = null;
-    let mimeType = null;
+    let fileData = null; let fileName = null; let mimeType = null;
 
     if (fileInput.files.length > 0) {
       const file = fileInput.files[0];
-      // Validasi maks 5MB
-      if (file.size > 5 * 1024 * 1024) {
-        return notify('Ukuran foto tidak boleh lebih dari 5MB!', 'error');
-      }
+      if (file.size > 5 * 1024 * 1024) return notify('Ukuran foto maksimal 5MB!', 'error');
       
       const base64 = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result.split(',')[1]);
         reader.readAsDataURL(file);
       });
-      
-      fileData = base64;
-      fileName = file.name;
-      mimeType = file.type;
+      fileData = base64; fileName = file.name; mimeType = file.type;
     }
 
     btn.classList.add('is-loading');
@@ -874,18 +946,10 @@
       const res = await apiCall('updateProfile', { newPassword: np, fileData: fileData, fileName: fileName, mimeType: mimeType });
       if(res.error) throw new Error(res.error);
       notify(res.message);
-      
-      if(res.foto) { 
-        currentUser.foto = res.foto; 
-        document.getElementById('user-foto').src = res.foto; 
-      }
+      if(res.foto) { currentUser.foto = res.foto; document.getElementById('user-foto').src = res.foto; }
       localStorage.setItem('bi_session', JSON.stringify(currentUser));
       closeModal('settings-modal');
-      
-      // Bersihkan form upload
-      document.getElementById('setting-foto-file').value = '';
-      document.getElementById('setting-pass').value = '';
-      
+      document.getElementById('setting-foto-file').value = ''; document.getElementById('setting-pass').value = '';
     } catch(e) { notify(e.message, 'error'); }
     finally { btn.classList.remove('is-loading'); }
   }
