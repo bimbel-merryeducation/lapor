@@ -55,7 +55,6 @@ body {
 .tabs.is-toggle li[data-target="rekap-absensi-tab"].is-active a { background-color: #dc3545; color: white; }
 .tabs.is-toggle li[data-target="cetak-laporan-tab"] a { background-color: rgba(32, 156, 238, 0.7); color: white;}
 .tabs.is-toggle li[data-target="cetak-laporan-tab"].is-active a { background-color: #209cee; color: white; }
-
 .tabs.is-toggle li[data-target="manajemen-siswa-tab"] a { background-color: rgba(50, 115, 220, 0.7); color: white;} .tabs.is-toggle li[data-target="manajemen-siswa-tab"].is-active a { background-color: #3273dc; }
 
 .tabs ul { border-bottom: none; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
@@ -80,7 +79,7 @@ body {
 }
 .pulse-warning { animation: pulse-urgent 2s infinite; background-color: #ffe5e5 !important; border-left: 5px solid #f14668; }
 
-/* LAYOUT PRINT KHUSUS (MENGHILANGKAN UI) */
+/* LAYOUT PRINT KHUSUS */
 @media print {
   body { background: white !important; padding: 0 !important; margin: 0 !important; }
   #app, .section, .box { background: white !important; box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; }
@@ -805,45 +804,107 @@ function renderCetakLaporanTab() {
   const gurus = [...new Set(filteredSiswa.flatMap(s => s.guruUsernames.split(',').map(e => e.trim().toLowerCase())))].sort();
   guruSelect.innerHTML = '<option value="">-- Pilih Guru --</option>' + gurus.map(g => `<option value="${g}">${g}</option>`).join('');
 }
+
 function populateMapelByGuru(gu) {
-  const mapels = [...new Set(appData.allNilaiData.slice(1).filter(n => n[7] === gu).map(n => n[4]))].sort();
+  // Mengambil unik mapel dengan case-insensitive & memformatnya ke Title Case (misal: "Matematika")
+  const mapelsUnfiltered = appData.allNilaiData.slice(1)
+    .filter(n => n[7].toString().toLowerCase() === gu.toLowerCase())
+    .map(n => n[4].toString().trim());
+  const toTitleCase = (str) => str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+  const mapels = [...new Set(mapelsUnfiltered.map(toTitleCase))].sort();
+  
   document.getElementById('cetak-mapel-select').innerHTML = '<option value="">-- Pilih Pelajaran --</option>' + mapels.map(m => `<option value="${m}">${m}</option>`).join('');
   document.getElementById('cetak-preview-container').style.display = 'none';
 }
+
 function updateCetakLaporanPreview() {
-  const gu = document.getElementById('cetak-guru-select').value; const mp = document.getElementById('cetak-mapel-select').value;
+  const gu = document.getElementById('cetak-guru-select').value; 
+  const mp = document.getElementById('cetak-mapel-select').value;
   const box = document.getElementById('cetak-preview-container');
   if(!gu || !mp) return box.style.display = 'none';
-  document.getElementById('report-mapel-nama').textContent = mp; document.getElementById('print-nama-mapel').textContent = mp;
+  
+  document.getElementById('report-mapel-nama').textContent = mp; 
+  document.getElementById('print-nama-mapel').textContent = mp;
   const tb = document.querySelector('#rekap-nilai-cetak-table tbody'); tb.innerHTML = '';
+  
   const muridGuru = filteredSiswa.filter(s => s.guruUsernames.toLowerCase().includes(gu.toLowerCase()));
   let countBelow75 = 0; let totalSiswaWithNilai = 0; const labels = []; const chartData = [];
+  
   const formatNilai = (val) => {
     if (val === '' || val === null || val === undefined) return '';
     return Number(val) < 75 ? `<span style="color:red; font-weight:bold;">${val}</span>` : val;
   };
+  
   muridGuru.forEach(s => {
-    const nilaiSiswa = appData.allNilaiData.slice(1).filter(n => n[2] === s.id && n[4] === mp);
-    const getNilai = (jenis) => nilaiSiswa.find(n => n[6] && n[6].toLowerCase().includes(jenis))?.[5] || '';
-    const ul1 = getNilai('ulangan 1'); const ul2 = getNilai('ulangan 2'); const ul3 = getNilai('ulangan 3'); const sumatif = getNilai('sumatif'); const pas = getNilai('pas');
+    // Memastikan pencarian mapel mengabaikan huruf besar/kecil (Fisika == fisika)
+    const nilaiSiswa = appData.allNilaiData.slice(1).filter(n => 
+        n[2] === s.id && 
+        n[4].toString().toLowerCase() === mp.toLowerCase() && 
+        n[5] !== ''
+    );
+    
+    // Urutkan nilai berdasarkan tanggal pengerjaan
+    let scores = nilaiSiswa.map(n => ({ 
+        ket: n[6] ? n[6].toString().toLowerCase() : '', 
+        nilai: n[5], 
+        date: new Date(n[1]),
+        used: false
+    })).sort((a,b) => a.date - b.date);
+
+    let ul1 = '', ul2 = '', ul3 = '', sumatif = '', pas = '';
+    
+    // Langkah 1: Coba deteksi spesifik dari kata kunci di Keterangan
+    scores.forEach(sc => {
+      if (!sc.used) {
+        if (sc.ket.includes('ulangan 1') || sc.ket.includes('uh 1') || sc.ket.includes('uh1') || sc.ket.includes('ph 1') || sc.ket.includes('ph1')) { ul1 = sc.nilai; sc.used = true; }
+        else if (sc.ket.includes('ulangan 2') || sc.ket.includes('uh 2') || sc.ket.includes('uh2') || sc.ket.includes('ph 2') || sc.ket.includes('ph2')) { ul2 = sc.nilai; sc.used = true; }
+        else if (sc.ket.includes('ulangan 3') || sc.ket.includes('uh 3') || sc.ket.includes('uh3') || sc.ket.includes('ph 3') || sc.ket.includes('ph3')) { ul3 = sc.nilai; sc.used = true; }
+        else if (sc.ket.includes('sumatif') || sc.ket.includes('pts') || sc.ket.includes('mid')) { sumatif = sc.nilai; sc.used = true; }
+        else if (sc.ket.includes('pas') || sc.ket.includes('sas') || sc.ket.includes('akhir')) { pas = sc.nilai; sc.used = true; }
+      }
+    });
+
+    // Langkah 2: Jika keterangan hanya berupa materi (seperti "Bilangan bulat"), isikan secara berurutan ke slot yang masih kosong
+    let emptySlots = [];
+    if (ul1 === '') emptySlots.push((val) => ul1 = val);
+    if (ul2 === '') emptySlots.push((val) => ul2 = val);
+    if (ul3 === '') emptySlots.push((val) => ul3 = val);
+    if (sumatif === '') emptySlots.push((val) => sumatif = val);
+    if (pas === '') emptySlots.push((val) => pas = val);
+
+    scores.filter(sc => !sc.used).forEach(sc => {
+      if (emptySlots.length > 0) {
+        let fill = emptySlots.shift();
+        fill(sc.nilai);
+      }
+    });
+
     const allNilai = [ul1, ul2, ul3, sumatif, pas].filter(v => v !== '').map(Number);
     const rataRata = allNilai.length > 0 ? (allNilai.reduce((a,b)=>a+b,0) / allNilai.length).toFixed(2) : '';
     const raport = rataRata ? Math.round(rataRata) : '';
-    if (allNilai.length > 0) { totalSiswaWithNilai++; if (Number(rataRata) < 75) countBelow75++; }
+    
+    if (allNilai.length > 0) { 
+        totalSiswaWithNilai++; 
+        if (Number(rataRata) < 75) countBelow75++; 
+    }
+    
     tb.insertRow().innerHTML = `<td>${s.nama}</td><td>${formatNilai(ul1)}</td><td>${formatNilai(ul2)}</td><td>${formatNilai(ul3)}</td><td>${formatNilai(sumatif)}</td><td>${formatNilai(pas)}</td><td>${formatNilai(rataRata)}</td><td>${formatNilai(raport)}</td>`;
     labels.push(s.nama); chartData.push(rataRata === '' ? 0 : Number(rataRata));
   });
+  
   const pctContainer = document.getElementById('persentase-remedial');
   if (totalSiswaWithNilai > 0) {
     const pct = ((countBelow75 / totalSiswaWithNilai) * 100).toFixed(1);
     pctContainer.innerHTML = `Siswa dengan nilai rata-rata di bawah 75 (Perlu Remedial) : <span>${pct}%</span> (${countBelow75} dari ${totalSiswaWithNilai} Siswa)`;
     pctContainer.style.display = 'block';
   } else { pctContainer.style.display = 'none'; }
+  
   const ctx = document.getElementById('cetak-nilai-chart');
   if(cetakNilaiChart) cetakNilaiChart.destroy();
   cetakNilaiChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Rata-rata Nilai', data: chartData, backgroundColor: 'rgba(54, 162, 235, 0.5)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }] }, options: { responsive: true, animation: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } } });
   box.style.display = 'block';
 }
+
 function exportToExcel() {
   const table = document.getElementById("rekap-nilai-cetak-table"); const mapel = document.getElementById('cetak-mapel-select').value;
   if(!mapel) return notify('Pilih Mapel terlebih dahulu!', 'warning');
