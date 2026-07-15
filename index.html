@@ -43,14 +43,13 @@ body {
 .tabs.is-toggle li.is-active a { color: white; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); }
 .tabs.is-toggle li:hover a { background: rgba(255,255,255,0.9); }
 
-/* Pewarnaan Tab Sesuai Request & Gambar */
+/* Pewarnaan Tab */
 .tabs.is-toggle li[data-target="dashboard-tab"] a { background-color: rgba(62, 142, 208, 0.7); } .tabs.is-toggle li[data-target="dashboard-tab"].is-active a { background-color: #3e8ed0; }
 .tabs.is-toggle li[data-target="kehadiran-tab"] a { background-color: rgba(72, 199, 142, 0.7); } .tabs.is-toggle li[data-target="kehadiran-tab"].is-active a { background-color: #48c78e; }
 .tabs.is-toggle li[data-target="laporan-tab"] a { background-color: rgba(255, 221, 87, 0.7); color: #333;} .tabs.is-toggle li[data-target="laporan-tab"].is-active a { background-color: #ffdd57; color: #333;}
 .tabs.is-toggle li[data-target="jadwal-ulangan-tab"] a { background-color: rgba(165, 94, 234, 0.7); } .tabs.is-toggle li[data-target="jadwal-ulangan-tab"].is-active a { background-color: #a55eea; }
 .tabs.is-toggle li[data-target="nilai-tab"] a { background-color: rgba(241, 70, 104, 0.7); } .tabs.is-toggle li[data-target="nilai-tab"].is-active a { background-color: #f14668; }
 
-/* Tab Merah & Biru Khusus Rekap/Cetak */
 .tabs.is-toggle li[data-target="rekap-absensi-tab"] a { background-color: rgba(220, 53, 69, 0.7); color: white; }
 .tabs.is-toggle li[data-target="rekap-absensi-tab"].is-active a { background-color: #dc3545; color: white; }
 .tabs.is-toggle li[data-target="cetak-laporan-tab"] a { background-color: rgba(32, 156, 238, 0.7); color: white;}
@@ -77,7 +76,7 @@ body {
   70% { box-shadow: 0 0 0 10px rgba(241, 70, 104, 0); }
   100% { box-shadow: 0 0 0 0 rgba(241, 70, 104, 0); }
 }
-.pulse-warning { animation: pulse-urgent 2s infinite; background-color: #ffe5e5 !important; border-left: 5px solid #f14668; }
+.pulse-warning { animation: pulse-urgent 2s infinite; border-left: 5px solid #f14668; }
 
 /* LAYOUT PRINT KHUSUS */
 @media print {
@@ -205,27 +204,71 @@ body {
     </div>
     
     <div id="kehadiran-tab" class="tab-content">
-      <article class="message is-info is-small mb-4"><div class="message-body">
-        Siswa yang memiliki ulangan <strong>besok atau lusa</strong> akan otomatis berada di posisi teratas dan berwarna merah berdenyut.
-      </div></article>
-      <div class="columns is-multiline">
-        <div class="column is-one-third"><h2 class="title is-5">Input Kehadiran</h2></div>
-        <div class="column is-one-third"><h2 class="title is-5 has-text-success">Hadir Hari Ini</h2></div>
-        <div class="column is-one-third"><h2 class="title is-5 has-text-danger">Tidak Hadir Hari Ini</h2></div>
+      
+      <div class="columns is-mobile mb-4 text-center has-text-centered">
+        <div class="column">
+          <div class="box p-3" style="border-left: 4px solid #3273dc;">
+            <p class="heading mb-1">Total Siswa Anda</p>
+            <p class="title is-4 has-text-info" id="count-total-siswa">0</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box p-3 has-background-success-light" style="border-left: 4px solid #48c774;">
+            <p class="heading mb-1">Sudah Datang</p>
+            <p class="title is-4 has-text-success" id="count-hadir">0</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box p-3 has-background-danger-light" style="border-left: 4px solid #f14668;">
+            <p class="heading mb-1">Belum Datang</p>
+            <p class="title is-4 has-text-danger" id="count-belum">0</p>
+          </div>
+        </div>
       </div>
+
+      <article class="message is-info is-small mb-4"><div class="message-body">
+        Siswa yang memiliki ulangan <strong>Besok</strong> akan berwarna <span class="has-text-danger has-text-weight-bold">Merah</span>, dan <strong>Lusa</strong> berwarna <span class="has-text-info has-text-weight-bold">Biru</span>. Warna indikator akan tetap dipertahankan meskipun siswa sudah diproses absennya.
+      </div></article>
+
       <div class="columns is-multiline">
         <div class="column is-one-third">
-          <div class="field"><div class="control"><div class="select is-fullwidth"><select id="filter-jenjang-kehadiran" onchange="filterKehadiran()"></select></div></div></div>
-          <div class="table-container"><table class="table is-striped is-hoverable is-fullwidth kehadiran-input-table">
-            <thead><tr><th>Nama (Paket)</th><th>Status</th><th>Aksi</th></tr></thead>
-            <tbody id="kehadiran-input-table"></tbody>
-          </table></div>
+          <h2 class="title is-5 mb-2">Input Kehadiran</h2>
+          <div class="field is-grouped">
+            <div class="control is-expanded">
+              <input class="input" type="text" id="search-nama-kehadiran" placeholder="Cari / Filter Nama..." onkeyup="filterKehadiran()">
+            </div>
+            <div class="control">
+              <div class="select">
+                <select id="filter-jenjang-kehadiran" onchange="filterKehadiran()"></select>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="table is-striped is-hoverable is-fullwidth kehadiran-input-table">
+              <thead><tr><th>No</th><th>Nama (Paket)</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody id="kehadiran-input-table"></tbody>
+            </table>
+          </div>
         </div>
+        
         <div class="column is-one-third">
-          <div class="table-container"><table class="table is-fullwidth is-striped"><thead><tr><th>Nama Siswa</th></tr></thead><tbody id="kehadiran-hadir-table"></tbody></table></div>
+          <h2 class="title is-5 has-text-success mb-2">Hadir Hari Ini</h2>
+          <div class="table-container">
+            <table class="table is-fullwidth is-striped">
+              <thead><tr><th>No</th><th>Nama Siswa</th></tr></thead>
+              <tbody id="kehadiran-hadir-table"></tbody>
+            </table>
+          </div>
         </div>
+        
         <div class="column is-one-third">
-          <div class="table-container"><table class="table is-fullwidth is-striped"><thead><tr><th>Nama Siswa</th><th>Keterangan</th></tr></thead><tbody id="kehadiran-tidak-hadir-table"></tbody></table></div>
+          <h2 class="title is-5 has-text-danger mb-2">Tidak Hadir Hari Ini</h2>
+          <div class="table-container">
+            <table class="table is-fullwidth is-striped">
+              <thead><tr><th>No</th><th>Nama Siswa</th><th>Keterangan</th></tr></thead>
+              <tbody id="kehadiran-tidak-hadir-table"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -583,48 +626,106 @@ function drawChart(canvasId, chartRef, labels, data, color) {
 function updateKehadiranUI() {
   const activeSiswa = filteredSiswa.filter(s => s.status === 'Aktif');
   const todayKehadiran = appData.allKehadiranData.slice(1).filter(row => new Date(row[1]).toLocaleDateString() === today.toLocaleDateString());
+  
+  // Perhitungan Data Absen Counter
+  const hadirIds = todayKehadiran.filter(r => r[5] === 'Datang').map(r => r[2]);
+  const totalHadir = activeSiswa.filter(s => hadirIds.includes(s.id)).length;
+  const totalSiswa = activeSiswa.length;
+  const totalBelum = totalSiswa - totalHadir;
+
+  document.getElementById('count-total-siswa').textContent = totalSiswa;
+  document.getElementById('count-hadir').textContent = totalHadir;
+  document.getElementById('count-belum').textContent = totalBelum;
+
+  // Render dropdown filter tanpa me-reset value
   const jenjangs = [...new Set(activeSiswa.map(s => s.jenjang))].sort();
   const fJenjang = document.getElementById('filter-jenjang-kehadiran');
+  const currJenjangVal = fJenjang.value;
   fJenjang.innerHTML = '<option value="">Semua Jenjang</option>' + jenjangs.map(j => `<option value="${j}">${j}</option>`).join('');
+  fJenjang.value = currJenjangVal;
+  
   filterKehadiran();
-  const tbodyHadir = document.getElementById('kehadiran-hadir-table'); const tbodyTidak = document.getElementById('kehadiran-tidak-hadir-table');
+
+  const tbodyHadir = document.getElementById('kehadiran-hadir-table'); 
+  const tbodyTidak = document.getElementById('kehadiran-tidak-hadir-table');
   tbodyHadir.innerHTML = ''; tbodyTidak.innerHTML = '';
+
+  const tm = new Date(today); tm.setDate(today.getDate() + 1); const tmStr = tm.toLocaleDateString();
+  const lusa = new Date(today); lusa.setDate(today.getDate() + 2); const lusaStr = lusa.toLocaleDateString();
+  
+  const getExamStatus = (sId) => {
+    const uls = appData.allNilaiData.slice(1).filter(n => n[2] === sId && n[5] === '');
+    if (uls.some(n => new Date(n[1]).toLocaleDateString() === tmStr)) return 'besok';
+    if (uls.some(n => new Date(n[1]).toLocaleDateString() === lusaStr)) return 'lusa';
+    return 'none';
+  };
+
+  let noHadir = 1;
+  let noTidak = 1;
+
   todayKehadiran.forEach(r => {
-    if(r[5] === 'Datang') tbodyHadir.insertRow().innerHTML = `<td>${r[3]}</td>`;
-    else tbodyTidak.insertRow().innerHTML = `<td>${r[3]}</td><td>${r[6]}</td>`;
+    const s = activeSiswa.find(x => x.id === r[2]);
+    if (!s) return;
+    
+    const exStat = getExamStatus(s.id);
+    const bgClass = exStat === 'besok' ? 'has-background-danger-light pulse-warning' : (exStat === 'lusa' ? 'has-background-info-light' : '');
+
+    if(r[5] === 'Datang') {
+      const tr = tbodyHadir.insertRow();
+      if(bgClass) tr.className = bgClass;
+      tr.innerHTML = `<td>${noHadir++}</td><td>${r[3]}</td>`;
+    } else {
+      const tr = tbodyTidak.insertRow();
+      if(bgClass) tr.className = bgClass;
+      tr.innerHTML = `<td>${noTidak++}</td><td>${r[3]}</td><td>${r[6]}</td>`;
+    }
   });
 }
 
 function filterKehadiran() {
   const fVal = document.getElementById('filter-jenjang-kehadiran').value;
+  const sVal = document.getElementById('search-nama-kehadiran').value.toLowerCase();
+  
   const hadirIds = appData.allKehadiranData.slice(1).filter(row => new Date(row[1]).toLocaleDateString() === today.toLocaleDateString()).map(r => r[2]);
   let list = filteredSiswa.filter(s => s.status === 'Aktif' && !hadirIds.includes(s.id));
+  
   if(fVal) list = list.filter(s => s.jenjang === fVal);
+  if(sVal) list = list.filter(s => s.nama.toLowerCase().includes(sVal));
 
-  const tm = new Date(today); tm.setDate(today.getDate() + 1);
-  const lusa = new Date(today); lusa.setDate(today.getDate() + 2);
-  const tmStr = tm.toLocaleDateString(); const lusaStr = lusa.toLocaleDateString();
+  const tm = new Date(today); tm.setDate(today.getDate() + 1); const tmStr = tm.toLocaleDateString();
+  const lusa = new Date(today); lusa.setDate(today.getDate() + 2); const lusaStr = lusa.toLocaleDateString();
+  
   list.forEach(s => {
     const uls = appData.allNilaiData.slice(1).filter(n => n[2] === s.id && n[5] === '');
-    s.hasUrgentExam = uls.some(n => {
-      const d = new Date(n[1]).toLocaleDateString();
-      return d === tmStr || d === lusaStr || d === today.toLocaleDateString();
-    });
+    s.examStatus = 'none';
+    if (uls.some(n => new Date(n[1]).toLocaleDateString() === tmStr)) s.examStatus = 'besok';
+    else if (uls.some(n => new Date(n[1]).toLocaleDateString() === lusaStr)) s.examStatus = 'lusa';
   });
-  list.sort((a, b) => (b.hasUrgentExam === true) - (a.hasUrgentExam === true));
+  
+  // Sort priority: Besok > Lusa > Biasa
+  list.sort((a, b) => {
+    const valA = a.examStatus === 'besok' ? 2 : (a.examStatus === 'lusa' ? 1 : 0);
+    const valB = b.examStatus === 'besok' ? 2 : (b.examStatus === 'lusa' ? 1 : 0);
+    return valB - valA;
+  });
+
   const tbody = document.getElementById('kehadiran-input-table'); tbody.innerHTML = '';
+  let no = 1;
   list.forEach(s => {
-    const hc = s.hasUrgentExam ? 'pulse-warning' : '';
-    tbody.insertRow().innerHTML = `
-      <td class="${hc}">${s.nama} <br><span class="is-size-7 has-text-grey">${s.paket}</span></td>
-      <td class="${hc}">
+    const bgClass = s.examStatus === 'besok' ? 'has-background-danger-light pulse-warning' : (s.examStatus === 'lusa' ? 'has-background-info-light' : '');
+    const tr = tbody.insertRow();
+    if(bgClass) tr.className = bgClass;
+    tr.innerHTML = `
+      <td width="5%">${no++}</td>
+      <td>${s.nama} <br><span class="is-size-7 has-text-grey">${s.paket}</span></td>
+      <td>
         <div class="control">
           <label class="radio is-size-7"><input type="radio" name="st-${s.id}" value="Datang" onchange="document.getElementById('ket-${s.id}').style.display='none'" checked>Hadir</label><br>
           <label class="radio is-size-7"><input type="radio" name="st-${s.id}" value="Tidak Datang" onchange="document.getElementById('ket-${s.id}').style.display='block'">T. Hadir</label>
         </div>
         <input class="input is-small mt-1" type="text" id="ket-${s.id}" style="display:none;" placeholder="Ket.">
       </td>
-      <td class="${hc}"><button class="button is-small is-primary is-light" onclick="submitKehadiran('${s.id}', '${s.nama}', '${s.jenjang}', this)"><i class="fas fa-check"></i></button></td>
+      <td width="15%"><button class="button is-small is-primary is-light" onclick="submitKehadiran('${s.id}', '${s.nama}', '${s.jenjang}', this)"><i class="fas fa-check"></i></button></td>
     `;
   });
 }
@@ -806,7 +907,6 @@ function renderCetakLaporanTab() {
 }
 
 function populateMapelByGuru(gu) {
-  // Mengambil unik mapel dengan case-insensitive & memformatnya ke Title Case (misal: "Matematika")
   const mapelsUnfiltered = appData.allNilaiData.slice(1)
     .filter(n => n[7].toString().toLowerCase() === gu.toLowerCase())
     .map(n => n[4].toString().trim());
@@ -836,14 +936,12 @@ function updateCetakLaporanPreview() {
   };
   
   muridGuru.forEach(s => {
-    // Memastikan pencarian mapel mengabaikan huruf besar/kecil (Fisika == fisika)
     const nilaiSiswa = appData.allNilaiData.slice(1).filter(n => 
         n[2] === s.id && 
         n[4].toString().toLowerCase() === mp.toLowerCase() && 
         n[5] !== ''
     );
     
-    // Urutkan nilai berdasarkan tanggal pengerjaan
     let scores = nilaiSiswa.map(n => ({ 
         ket: n[6] ? n[6].toString().toLowerCase() : '', 
         nilai: n[5], 
@@ -853,7 +951,6 @@ function updateCetakLaporanPreview() {
 
     let ul1 = '', ul2 = '', ul3 = '', sumatif = '', pas = '';
     
-    // Langkah 1: Coba deteksi spesifik dari kata kunci di Keterangan
     scores.forEach(sc => {
       if (!sc.used) {
         if (sc.ket.includes('ulangan 1') || sc.ket.includes('uh 1') || sc.ket.includes('uh1') || sc.ket.includes('ph 1') || sc.ket.includes('ph1')) { ul1 = sc.nilai; sc.used = true; }
@@ -864,7 +961,6 @@ function updateCetakLaporanPreview() {
       }
     });
 
-    // Langkah 2: Jika keterangan hanya berupa materi (seperti "Bilangan bulat"), isikan secara berurutan ke slot yang masih kosong
     let emptySlots = [];
     if (ul1 === '') emptySlots.push((val) => ul1 = val);
     if (ul2 === '') emptySlots.push((val) => ul2 = val);
